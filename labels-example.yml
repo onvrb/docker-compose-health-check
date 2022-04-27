@@ -1,0 +1,32 @@
+services:
+  joao:
+    image: "joao"
+    labels:
+      - "dchc.enable=true"
+      - "dchc.protocol=tcp"
+      - "dchc.timeout=15"
+      - "dchc.retries=10"
+      - "dchc.endpoint=/ping"
+      - "dchc.http.method=GET"
+      - "dchc.port=80"
+    ports:
+      - 80:80
+      - 443:443
+  maria:
+    image: "maria"
+    ports:
+      - 81:80
+      - 443:443
+  angelo:
+    image: "angelo"
+    labels:
+      - "dchc.enable=true"
+      - "dchc.protocol=http"
+      - "dchc.timeout=30"
+      - "dchc.retries=20"
+      - "dchc.endpoint=/pong"
+      - "dchc.http.method=PUT"
+      - "dchc.port=82"
+    ports:
+      - 82:80
+      - 443:443
