@@ -7,8 +7,7 @@ function tcp(key, value) {
 
 async function http(key, value) {
     console.log(`Running HTTP check for ${key}`);
-    // const url = `${value.protocol}://${value.hostname}:${value.port}${value.endpoint}`;
-    const url = 'https://api.github.com/';
+    const url = `${value.protocol}://${value.hostname}:${value.port}${value.endpoint}`;
 
     for (let i = 1; i <= value.retries; i++) {
         try {
