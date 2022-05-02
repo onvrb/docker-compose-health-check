@@ -1,34 +1,40 @@
+// import node-fetch v3 https://github.com/node-fetch/node-fetch#commonjs
+const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
 function tcp(key, value) {
-    
+    console.log(`Running TCP check for ${key}`);
 }
 
-function http(key, value) {
-    console.log(`http check for ${key}`);
+async function http(key, value) {
+    console.log(`Running HTTP check for ${key}`);
+    // const url = `${value.protocol}://${value.hostname}:${value.port}${value.endpoint}`;
+    const url = 'https://api.github.com/';
 
-    const http = require('http');
-    const options = {
-        hostname: value.hostname,
-        port: value.port,
-        path: value.http.endpoint,
-        method: value.http.method,
-    };
-    const req = http.request(options, (res) => {
-        console.log(`statusCode: ${res.statusCode}`);
-        console.log(`headers: ${JSON.stringify(res.headers)}`);
-        res.on('data', (d) => {
-            process.stdout.write(d);
-        });
+    for (let i = 1; i <= value.retries; i++) {
+        try {
+            var response = await fetch(url);
+            if (response.ok) {
+                break;
+            }
+            // console.log(response);
+            return;
+        } catch (error) {
+            console.log(`HTTP check for ${key} failed (attempt ${i} of ${value.retries} every ${value.timeout} seconds): ${error}`);
+            // console.log(error);
+        }
+        // wait value.timeout seconds
+        await new Promise(resolve => setTimeout(resolve, value.timeout * 1000));
+    }
+    console.log(`Finished HTTP check for ${key} with status code ${response.status}`);
 
-    // throw new Error(`Error on container ${key} using ${value.protocol} protocol`);
 }
 
 function https(key, value) {
-    console.log('https check');
+    console.log(`Running HTTPS check for ${key}`);
 }
 
 function mysql(key, value) {
-    console.log('mysql check');
+    console.log(`Running mysql check for ${key}`);
 }
 
 

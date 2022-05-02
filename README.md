@@ -6,3 +6,7 @@ todo:
 
 - check label inputs
 - test connections for each service
+
+done:
+
+- http / https

@@ -2,9 +2,7 @@ const core = require('@actions/core');
 const github = require('@actions/github');
 const yaml = require('js-yaml');
 const fs = require('fs');
-const path = require("path");
-const { dump } = require('js-yaml');
-const { exit } = require('process');
+const path = require('path');
 
 // import locals
 const myImport = require('./import.js'); 
@@ -21,9 +19,9 @@ try {
 // health check
 try {
     // ping containers
-    // myHc.healthCheck(services);
+    myHc.healthCheck(services);
 
-    console.log(services);
+    // console.log(services);
 
     // console.log(MY_SERVICES.angelo.http.method);
 
