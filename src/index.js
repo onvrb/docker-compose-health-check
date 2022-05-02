@@ -12,8 +12,8 @@ const myHc = require('./health-check.js');
 
 // get inputs
 try {
-    // dchc yaml parser
-    const services = myImport.getDockerComposeServices(yaml.load(fs.readFileSync(path.resolve(__dirname, '../labels-example.yml'), 'utf8')));
+    const doc = fs.readFileSync(path.resolve(__dirname, '../labels-example.yml'), 'utf8');
+    var services = myImport.getDockerComposeServices(yaml.load(doc));
 } catch (error) {
     core.setFailed(error.message);
 }
@@ -21,9 +21,9 @@ try {
 // health check
 try {
     // ping containers
-    myHc.healthCheck(services);
+    // myHc.healthCheck(services);
 
-    // console.log(services);
+    console.log(services);
 
     // console.log(MY_SERVICES.angelo.http.method);
 
