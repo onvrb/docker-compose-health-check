@@ -2,15 +2,15 @@ const PREFIX = 'dchc';
 const MY_SERVICES = {};
 const DEFAULTS = {
     'enable': 'false',
-    'hostname': 'localhost',
     'protocol': 'tcp',
+    'hostname': 'localhost',
+    'port': '80',
+    'http': {
+        'endpoint': '/',
+        'method': 'GET',
+    },
     'timeout': '5',
     'retries': '10',
-    'http': {
-        'method': 'GET',
-        'endpoint': '/',
-    },
-    'port': '80',
 };
 
 function getDockerComposeServices(doc) {
