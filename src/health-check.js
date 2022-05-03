@@ -2,7 +2,6 @@ const check = require('./protocols.js');
 
 // check protocol and call function
 function healthCheck(services) {
-    console.log(Object.entries(services));
     for (const [key, value] of Object.entries(services)) {
         if (value.enable === 'true') {
             switch (value.protocol) {
