@@ -2,16 +2,22 @@ const check = require('./protocols.js');
 
 // check protocol and call function
 function healthCheck(services) {
+    console.log(Object.entries(services));
     for (const [key, value] of Object.entries(services)) {
         if (value.enable === 'true') {
-            if (value.protocol === 'tcp') {
-                check.tcp(key, value);
-            } else if (value.protocol === 'http' || value.protocol === 'https') {
-                check.http(key, value);
-            } else if (value.protocol === 'mysql') {
-                check.mysql(key, value);
-            } else {
-                throw new Error(`Unsupported protocol for ${key}`);
+            switch (value.protocol) {
+                case 'tcp':
+                    check.tcp(key, value);
+                    break;
+                case 'http':
+                case 'https':
+                    check.http(key, value);
+                    break;
+                case 'mysql':
+                    check.mysql(key, value);
+                    break;
+                default:
+                    core.setFailed(`Unsupported protocol for ${key}`);
             }
         }
         else { console.log(`Skipping check for ${key} (not enabled)`); }
