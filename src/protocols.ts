@@ -1,9 +1,10 @@
-const core = require('@actions/core');
-const net = require('net');
-// import node-fetch v3 https://github.com/node-fetch/node-fetch#commonjs
-const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
+import core from '@actions/core';
+import net from 'net';
 
-function tcp(key, value) {
+// import node-fetch v3 https://github.com/node-fetch/node-fetch#commonjs
+const fetch = (...args: string[]) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
+
+function tcp(key: any, value: { timeout: number; port: number; hostname: string; }) {
     console.log(`Running TCP check for ${key}`);
 
     const client = new net.Socket();
@@ -19,7 +20,7 @@ function tcp(key, value) {
     });
 }
 
-async function http(key, value) {
+async function http(key: any, value: { protocol: string; hostname: string; port: number; http: { endpoint: string; method: string; }; retries: number; timeout: number; }) {
     console.log(`Running HTTP check for ${key}`);
     const url = `${value.protocol}://${value.hostname}:${value.port}${value.http.endpoint}`;
 
@@ -44,7 +45,7 @@ async function http(key, value) {
 
 }
 
-function mysql(key, value) {
+function mysql(key: any, value: any) {
     console.log(`Running mysql check for ${key}`);
 }
 
