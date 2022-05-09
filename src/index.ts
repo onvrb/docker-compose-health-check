@@ -1,12 +1,12 @@
-const core = require('@actions/core');
-const github = require('@actions/github');
-const yaml = require('js-yaml');
-const fs = require('fs');
-const path = require('path');
+import core from '@actions/core';
+import github from '@actions/github';
+import yaml from 'js-yaml';
+import fs from 'fs';
+import path from 'path';
 
 // import locals
-const myImport = require('./import.js'); 
-const myHc = require('./health-check.js');
+import * as myImport from './import'; 
+import * as myHc from './health-check';
 
 // get inputs
 try {

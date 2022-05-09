@@ -13,7 +13,7 @@ const DEFAULTS = {
     'retries': '10',
 };
 
-function getDockerComposeServices(doc) {
+export function getDockerComposeServices(doc) {
     for (const [key, value] of Object.entries(doc.services)) {                          // for every service
         MY_SERVICES[key] = { ...DEFAULTS };                                             // add key to MY_SERVICES with default values
         if (Array.isArray(value.labels)) {                                              // if labels is an array (not empty)
@@ -36,7 +36,3 @@ function getDockerComposeServices(doc) {
     }
     return MY_SERVICES;
 }
-
-module.exports = {
-    getDockerComposeServices,
-};

@@ -1,7 +1,7 @@
-const check = require('./protocols.js');
+import check from './protocols';
 
 // check protocol and call function
-function healthCheck(services) {
+export function healthCheck(services) {
     for (const [key, value] of Object.entries(services)) {
         if (value.enable === 'true') {
             switch (value.protocol) {
@@ -22,7 +22,3 @@ function healthCheck(services) {
         else { console.log(`Skipping check for ${key} (not enabled)`); }
     }
 }
-
-module.exports = {
-    healthCheck,
-};

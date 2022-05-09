@@ -45,13 +45,6 @@ async function http(key: any, value: { protocol: string; hostname: string; port:
 
 }
 
-function mysql(key: any, value: any) {
+export function mysql(key: any, value: any) {
     console.log(`Running mysql check for ${key}`);
 }
-
-
-module.exports = {
-    tcp,
-    http,
-    mysql,
-};
