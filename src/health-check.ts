@@ -1,4 +1,4 @@
-import check from './protocols';
+import * as check from './protocols';
 
 // check protocol and call function
 export function healthCheck(services) {
