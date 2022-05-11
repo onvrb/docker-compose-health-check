@@ -1,11 +1,13 @@
+version: 'version'
+
 services:
-  maria:
-    image: "maria"
+  service_maria:
+    image: "image_maria"
     ports:
-      - 81:80
+      - "8080:80"
       - 443:443
-  angelo:
-    image: "angelo"
+  service_angelo:
+    image: "image_angelo"
     labels:
       - "dchc.enable=true"
       - "dchc.protocol=tcp"
@@ -17,18 +19,21 @@ services:
       - "dchc.retries=3"
     ports:
       - 82:80
-      - 443:443
-  joao:
-    image: "joao"
+      - 22:443
+  service_joao:
+    image: "image_joao"
     labels:
       - "dchc.enable=true"
       - "dchc.protocol=http"
       - "dchc.hostname=archive.ubuntu.com"
-      - "dchc.port=80"
       - "dchc.http.endpoint=/"
       - "dchc.http.method=GET"
       - "dchc.timeout=3"
       - "dchc.retries=3"
     ports:
-      - 80:80
-      - 443:443
+      - 80
+      - "23"
+
+volumes:
+  volume_maria:
+    driver: local
