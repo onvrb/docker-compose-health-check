@@ -1,39 +1,65 @@
-import core from '@actions/core';
+// standard actions and github api libraries
+import * as core from '@actions/core'
+import * as github from '@actions/github'
+
+import { type } from 'os';
 import { exit } from "process";
+
 import * as YAML from "yamljs";
 
-import tcp from "./tcp";
+import checkPort from "./checks";
 
-const composeConfig = YAML.load("docker-compose.yml");
-// console.log(composeConfig.services);
+import path from "path";
 
-// console log each port from each service
-for (let serviceName in composeConfig.services) {
-    console.log(serviceName);
 
-    for (let servicePort of composeConfig.services[serviceName].ports as string[] | number[]) {
-        let port = 0;
-        
-        if (typeof servicePort === "number"){
-            port = servicePort;
+async function run(): Promise<void> {
+
+        core.info("Starting health check");
+        const wd: string = process.env[`GITHUB_WORKSPACE`] || "";
+
+        const yamlFile = core.getInput("docker-compose-file") || path.join(wd, "docker-compose.yml");
+        const composeConfig = YAML.load(yamlFile);
+
+        // grab the services from the compose file
+        const services = composeConfig.services;
+
+        // loop through the services
+        for (const serviceName in services) {
+            // get the service definition
+            const service = services[serviceName];
+ 
+            // loop trought the ports on the service definition
+            for (const port of service.ports as (string | number)[]) {
+                let portNumber = 0;
+                // convert the port to a number
+                switch(typeof port) {
+                    case "string": {
+                        portNumber = Number(port.split(":")[0]);
+                        if (isNaN(portNumber)) {
+                            core.setFailed(`Service: ${serviceName} / Value: ${port} / Invalid format`);
+                        }
+                        break;
+                    }
+                    case "number": {
+                        portNumber = Number(port);
+                        break;
+                    }
+                    default: {
+                        core.setFailed(`Service: ${serviceName} / Value: ${port} / Invalid port type: ${typeof port}`);
+                        // log error
+                        break;
+                    }
+                }
+                core.info(`Checking port ${portNumber} for service ${serviceName}...`);
+                if (await checkPort(portNumber)) {
+                    core.info(`Service: ${serviceName} / Port: ${portNumber} / Status: up`);
+                } else {
+                    core.setFailed(`Service: ${serviceName} / Port: ${portNumber} / Status: down`);
+                }
+            }
         }
-
-        if (typeof servicePort === "string"){
-            port = Number(servicePort.split(":")[0]);       // left side of colon is exposed-to-host port
-        }
-        
-        if (port === 0) {
-            // core.setFailed(`Could not parse port from ${servicePort}`);
-            console.log(`Could not parse port from ${servicePort}`);
-            exit(1);
-        }
-
-        // check port
-        console.log(port)
-        console.log(tcp(port))
-        // tcp(port);
-
-    }
-
+        core.info("Finished health check");
 }
+
+void run()
 
