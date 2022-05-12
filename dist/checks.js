@@ -13,12 +13,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_net_1 = __importDefault(require("node:net"));
-function checkPort(port, { host = "localhost", timeout = 1000 } = {}) {
+function checkPort(port, { host = 'localhost', timeout = 1000 } = {}) {
     return __awaiter(this, void 0, void 0, function* () {
         if (typeof host !== 'string') {
             throw new TypeError('Specify a `host`');
         }
-        const promise = new Promise(((resolve, reject) => {
+        const promise = new Promise((resolve, reject) => {
             const socket = new node_net_1.default.Socket();
             const onError = () => {
                 socket.destroy();
@@ -31,7 +31,7 @@ function checkPort(port, { host = "localhost", timeout = 1000 } = {}) {
                 socket.end();
                 resolve(true);
             });
-        }));
+        });
         try {
             yield promise;
             return true;

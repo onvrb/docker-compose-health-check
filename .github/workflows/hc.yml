@@ -1,0 +1,12 @@
+name: Docker compose health check
+on:
+  push:
+
+jobs:
+  hc:
+   
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: onvrb/docker-compose-health-check@main
+       

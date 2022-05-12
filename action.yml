@@ -1,0 +1,10 @@
+name: 'docker-compose-health-check'
+description: 'Health check docker compose services'
+inputs:
+  docker-compose-file:
+    description: 'Location of the docker-compose configuration file'
+    required: false
+    default: ./docker-compose.yml
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
