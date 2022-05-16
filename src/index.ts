@@ -2,7 +2,7 @@ import * as core from '@actions/core'
 
 import * as YAML from 'yamljs'
 
-import * as scheck from './checks'
+import checkService, { ServiceDef } from './checks'
 
 import * as path from 'path'
 
@@ -31,7 +31,7 @@ async function run(): Promise<void> {
       core.debug(`Found service: ${JSON.stringify(service)}`)
       core.debug(`Found ${Object.keys(service.ports).length} ports`)
 
-      const serviceDef: scheck.ServiceDef = {
+      const serviceDef: ServiceDef = {
         name: serviceName,
         labels: service.labels,
         ports: service.ports
@@ -39,9 +39,7 @@ async function run(): Promise<void> {
 
       console.log(serviceDef)
 
-      scheck.checkService(serviceDef)
-
-
+      checkService(serviceDef)
     }
   } catch (error) {
     if (error instanceof Error) {

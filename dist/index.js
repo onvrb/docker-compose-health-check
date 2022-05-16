@@ -27,10 +27,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(require("@actions/core"));
 const YAML = __importStar(require("yamljs"));
-const checks_1 = require("./checks");
+const checks_1 = __importDefault(require("./checks"));
 const path = __importStar(require("path"));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -58,7 +61,7 @@ function run() {
                     ports: service.ports
                 };
                 console.log(serviceDef);
-                checks_1.checkService(serviceDef);
+                checks_1.default(serviceDef);
             }
         }
         catch (error) {

@@ -9,4 +9,6 @@ jobs:
 
     steps:
       - uses: onvrb/docker-compose-health-check@main
+        with:
+          docker-compose-file: docker-compose.yml
        

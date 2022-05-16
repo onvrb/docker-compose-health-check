@@ -58,15 +58,31 @@ function checkService(service) {
                 }
             }
             core.info(`Checking port ${portNumber} for service ${service.name}...`);
-            //    if (await checkTCP(portNumber)) {
-            //      core.info(`Service: ${service.name} / Port: ${portNumber} / Status: 🟢`)
-            //   } else {
-            //    core.setFailed(`Service: ${service.name} / Port: ${portNumber} / Status: 🔴`)
-            // }
+            console.log(service.labels);
+            const options = parseConfig(service.labels);
+            if (yield checkTCP(options)) {
+                core.info(`Service: ${service.name} / Port: ${portNumber} / Status: 🟢`);
+            }
+            else {
+                core.setFailed(`Service: ${service.name} / Port: ${portNumber} / Status: 🔴`);
+            }
         }
     });
 }
 exports.default = checkService;
+function parseConfig(config) {
+    var options = {
+        port: 80,
+        protocol: 'tcp'
+    };
+    if (config.length === 0) {
+        return options;
+    }
+    for (const value of Object.values(config)) {
+        console.log(value);
+    }
+    return options;
+}
 function checkTCP(options) {
     return __awaiter(this, void 0, void 0, function* () {
         const host = '127.0.0.1';

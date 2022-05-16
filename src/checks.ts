@@ -3,17 +3,18 @@ import net from 'node:net'
 
 export interface ServiceDef {
   name: string
-  labels: {[key: string]: string}
+  //labels: {[key: string]: string}
+  labels: string[]
   ports: (string | number)[]
 }
 
 interface CheckPortOptions {
   port: number
-  enabled: boolean
-  timeout: number
-  retries: number
+  enabled?: boolean
+  timeout?: number
+  retries?: number
   protocol: string
-  config: {
+  configHttp?: {
     uri: string
     hostheader: string
     method: string
@@ -21,7 +22,6 @@ interface CheckPortOptions {
 }
 
 export default async function checkService(service: ServiceDef) {
-
   // loop trought the ports on the service definition
   for (const port of service.ports as (string | number)[]) {
     core.debug(`Checking port: ${port}`)
@@ -45,16 +45,44 @@ export default async function checkService(service: ServiceDef) {
       }
     }
     core.info(`Checking port ${portNumber} for service ${service.name}...`)
-//    if (await checkTCP(portNumber)) {
-//      core.info(`Service: ${service.name} / Port: ${portNumber} / Status: 🟢`)
- //   } else {
-  //    core.setFailed(`Service: ${service.name} / Port: ${portNumber} / Status: 🔴`)
-   // }
+
+    console.log(service.labels)
+
+    const options = parseConfig(service.labels)
+
+    if (await checkTCP(options)) {
+      core.info(`Service: ${service.name} / Port: ${portNumber} / Status: 🟢`)
+    } else {
+      core.setFailed(`Service: ${service.name} / Port: ${portNumber} / Status: 🔴`)
+    }
   }
 }
 
+function parseConfig(config: string[]): CheckPortOptions {
+
+  var options: CheckPortOptions = {
+    port: 80,
+    protocol: 'tcp'
+  }
+
+  if (config.length === 0) {
+    return options
+  }
+
+  for (const value of Object.values(config)) {
+    console.log(value)
+  }
+
+
+
+  return options
+}
+
 async function checkTCP(options: CheckPortOptions): Promise<boolean> {
-  const host = '127.0.0.1';
+  const host = '127.0.0.1'
+
+
+
 
   const promise = new Promise((resolve, reject) => {
     const socket = new net.Socket()
