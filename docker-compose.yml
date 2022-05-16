@@ -9,14 +9,13 @@ services:
   service_angelo:
     image: "image_angelo"
     labels:
-      - "dchc.enable=true"
-      - "dchc.protocol=tcp"
-      - "dchc.hostname=archive.ubuntu.com"
-      - "dchc.port=22"
-      - "dchc.http.endpoint=/"
-      - "dchc.http.method=GET"
-      - "dchc.timeout=3"
-      - "dchc.retries=3"
+      - "dchc.port.80.enable=true"
+      - "dchc.port.80.protocol=http"
+      - "dchc.port.80.http.hostname=archive.ubuntu.com"
+      - "dchc.port.80.http.uri=/"
+      - "dchc.port.80.http.method=GET"
+      - "dchc.port.80.timeout=3"
+      - "dchc.port.80.retries=3"
     ports:
       - 82:80
       - 22:443
@@ -34,7 +33,6 @@ services:
       - 80
       - "23"
       - 9180
-      - cassiano
 
 volumes:
   volume_maria:
