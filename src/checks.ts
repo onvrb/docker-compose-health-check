@@ -46,9 +46,7 @@ export default async function checkService(service: ServiceDef) {
     }
     core.info(`Checking port ${portNumber} for service ${service.name}...`)
 
-    console.log(service.labels)
-
-    const options = parseConfig(service.labels)
+    const options = parseConfig(service)
 
     if (await checkTCP(options)) {
       core.info(`Service: ${service.name} / Port: ${portNumber} / Status: 🟢`)
@@ -58,12 +56,14 @@ export default async function checkService(service: ServiceDef) {
   }
 }
 
-function parseConfig(config: string[]): CheckPortOptions {
+function parseConfig(service: ServiceDef): CheckPortOptions {
 
   var options: CheckPortOptions = {
     port: 80,
     protocol: 'tcp'
   }
+
+  // loop through the labels, if they have the prefix to the port, read the configuration.
 
   if (config.length === 0) {
     return options
