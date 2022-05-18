@@ -33,13 +33,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(require("@actions/core"));
 const YAML = __importStar(require("yamljs"));
-const checks_1 = __importDefault(require("./checks"));
 const path = __importStar(require("path"));
+const dot_properties_1 = require("dot-properties");
+const checks_1 = __importDefault(require("./checks"));
 function run() {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            if (!process.env['CI']) {
+                require('source-map-support').install();
+            }
             core.info('Starting health check 🚀');
-            const wd = process.env[`GITHUB_WORKSPACE`] || '';
+            const wd = process.env['GITHUB_WORKSPACE'] || '';
             core.debug(`GITHUB_WORKSPACE: ${wd}`);
             const yamlFile = core.getInput('docker-compose-file') || path.join(wd, 'docker-compose.yml');
             core.debug(`Using docker-compose file: ${yamlFile}`);
@@ -53,20 +58,47 @@ function run() {
                 core.debug(`Checking service: ${serviceName}`);
                 // get the service definition
                 const service = services[serviceName];
-                core.debug(`Found service: ${JSON.stringify(service)}`);
-                core.debug(`Found ${Object.keys(service.ports).length} ports`);
-                const serviceDef = {
+                core.debug(`Found service: ${JSON.stringify(service)} with ${Object.keys(service.ports).length} ports`);
+                if (service.ports === undefined) {
+                    core.setFailed(`Service ${serviceName} has no ports defined`);
+                }
+                if (service.labels === undefined) {
+                    core.info(`Service ${serviceName} has no labels defined, consider setting appropriate labels. Using defaults.`);
+                    service.labels = [];
+                }
+                const config = {
                     name: serviceName,
-                    labels: service.labels,
-                    ports: service.ports
+                    ports: []
                 };
-                console.log(serviceDef);
-                checks_1.default(serviceDef);
+                for (const port of service.ports) {
+                    let portNumber = 0;
+                    if (typeof port === 'string') {
+                        if (port.endsWith('/udp')) {
+                            core.info(`Service ${serviceName} has a UDP port: ${port}, not supported. TCP will be used instead.`);
+                        }
+                        portNumber = Number(port.split(':')[0]);
+                    }
+                    else {
+                        portNumber = Number(port);
+                    }
+                    const filteredLabels = service.labels
+                        .filter(label => {
+                        return label.includes(`.${portNumber}.`);
+                    })
+                        .join('\n');
+                    let configPort = {
+                        port: portNumber,
+                        config: dot_properties_1.parse(filteredLabels, true)
+                    };
+                    config.ports.push(configPort);
+                }
+                checks_1.default(config);
             }
         }
         catch (error) {
             if (error instanceof Error) {
                 core.setFailed(error.message);
+                console.log((_a = error.stack) === null || _a === void 0 ? void 0 : _a.split('\n'));
             }
         }
         finally {
@@ -75,3 +107,4 @@ function run() {
     });
 }
 void run();
+//# sourceMappingURL=index.js.map

@@ -33,79 +33,70 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(require("@actions/core"));
 const node_net_1 = __importDefault(require("node:net"));
-function checkService(service) {
+function checkServices(service) {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
-        // loop trought the ports on the service definition
-        for (const port of service.ports) {
-            core.debug(`Checking port: ${port}`);
-            let portNumber = 0;
-            // convert the port to a number
-            switch (typeof port) {
-                case 'string': {
-                    portNumber = Number(port.split(':')[0]);
-                    if (isNaN(portNumber)) {
-                        core.setFailed(`Service: ${service.name} / Value: ${port} / Invalid format`);
-                    }
+        for (const portConfig of service.ports) {
+            const port = String(portConfig.port);
+            const config = typeof portConfig.config === 'object' ? portConfig.config : {};
+            const dchc = typeof config['dchc'] === 'object' ? config['dchc'] : {};
+            const dchcPort = typeof dchc['port'] === 'object' ? dchc['port'] : {};
+            const mainConfig = typeof dchcPort[port] === 'object' ? dchcPort[port] : {};
+            const protocol = typeof mainConfig['protocol'] === 'string' ? mainConfig['protocol'] : "tcp";
+            const protocolConfig = ((_a = mainConfig[protocol]) !== null && _a !== void 0 ? _a : {});
+            let retCheck = false;
+            switch (protocol) {
+                default:
+                    retCheck = yield checkTCP(port, mainConfig);
                     break;
-                }
-                case 'number': {
-                    portNumber = Number(port);
-                    break;
-                }
-                default: {
-                    core.setFailed(`Service: ${service.name} / Value: ${port} / Invalid port type: ${typeof port}`);
-                    break;
-                }
             }
-            core.info(`Checking port ${portNumber} for service ${service.name}...`);
-            console.log(service.labels);
-            const options = parseConfig(service.labels);
-            if (yield checkTCP(options)) {
-                core.info(`Service: ${service.name} / Port: ${portNumber} / Status: 🟢`);
+            if (retCheck) {
+                core.info(`Service: ${service.name} / Port: ${port} / Status: 🟢`);
             }
             else {
-                core.setFailed(`Service: ${service.name} / Port: ${portNumber} / Status: 🔴`);
+                core.setFailed(`Service: ${service.name} / Port: ${port} / Status: 🔴`);
             }
         }
     });
 }
-exports.default = checkService;
-function parseConfig(config) {
-    var options = {
-        port: 80,
-        protocol: 'tcp'
-    };
-    if (config.length === 0) {
-        return options;
-    }
-    for (const value of Object.values(config)) {
-        console.log(value);
-    }
-    return options;
-}
-function checkTCP(options) {
+exports.default = checkServices;
+function delay(ms) {
     return __awaiter(this, void 0, void 0, function* () {
-        const host = '127.0.0.1';
-        const promise = new Promise((resolve, reject) => {
-            const socket = new node_net_1.default.Socket();
-            const onError = () => {
-                socket.destroy();
-                reject();
-            };
-            socket.setTimeout(1000);
-            socket.once('error', onError);
-            socket.once('timeout', onError);
-            socket.connect(options.port, host, () => {
-                socket.end();
-                resolve(true);
-            });
-        });
-        try {
-            yield promise;
-            return true;
-        }
-        catch (_a) {
-            return false;
-        }
+        yield new Promise(resolve => setTimeout(() => resolve(true), ms)).then(() => { });
     });
 }
+function checkTCP(port, options) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const host = '127.0.0.1';
+        const portNumber = Number(port);
+        const timeout = Number(options['timeout']) === NaN ? 1000 : Number(options['timeout']);
+        const retries = Number(options['retries']) === NaN ? 5 : Number(options['retries']);
+        const interval = Number(options['interval']) === NaN ? 1000 : Number(options['interval']);
+        for (let r = 0; r < retries; r++) {
+            const promise = new Promise((resolve, reject) => {
+                const socket = new node_net_1.default.Socket();
+                const onError = () => {
+                    socket.destroy();
+                    reject();
+                };
+                socket.setTimeout(timeout);
+                socket.once('error', onError);
+                socket.once('timeout', onError);
+                socket.connect(portNumber, host, () => {
+                    socket.end();
+                    resolve(true);
+                });
+            });
+            try {
+                yield promise;
+                return true;
+            }
+            catch (_a) {
+                console.log("DELAY");
+                yield delay(interval);
+            }
+        }
+        return false;
+    });
+}
+//# sourceMappingURL=checks.js.map

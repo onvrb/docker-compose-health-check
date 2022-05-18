@@ -1,111 +1,81 @@
 import * as core from '@actions/core'
+import {stringify, Tree} from 'dot-properties'
 import net from 'node:net'
 
 export interface ServiceDef {
   name: string
-  //labels: {[key: string]: string}
-  labels: string[]
-  ports: (string | number)[]
+  ports: PortDef[]
 }
-
-interface CheckPortOptions {
+export interface PortDef {
   port: number
-  enabled?: boolean
-  timeout?: number
-  retries?: number
-  protocol: string
-  configHttp?: {
-    uri: string
-    hostheader: string
-    method: string
-  }
+  config: Tree
 }
 
-export default async function checkService(service: ServiceDef) {
-  // loop trought the ports on the service definition
-  for (const port of service.ports as (string | number)[]) {
-    core.debug(`Checking port: ${port}`)
-    let portNumber = 0
-    // convert the port to a number
-    switch (typeof port) {
-      case 'string': {
-        portNumber = Number(port.split(':')[0])
-        if (isNaN(portNumber)) {
-          core.setFailed(`Service: ${service.name} / Value: ${port} / Invalid format`)
-        }
+type ConfigNode = Tree | string
+
+export default async function checkServices(service: ServiceDef) {
+  for (const portConfig of service.ports) {
+    const port = String(portConfig.port)
+    const config = typeof portConfig.config === 'object' ? portConfig.config:{} as Tree
+
+    const dchc = typeof config['dchc'] === 'object' ? config['dchc'] as Tree:{} as Tree
+    const dchcPort = typeof dchc['port'] === 'object' ? dchc['port'] as Tree:{} as Tree
+    const mainConfig = typeof dchcPort[port] === 'object' ? dchcPort[port] as Tree:{} as Tree
+    const protocol = typeof mainConfig['protocol'] === 'string' ? mainConfig['protocol']:"tcp"
+    const protocolConfig = (mainConfig[protocol] ?? {}) as Tree
+
+    let retCheck = false
+    switch (protocol) {
+      default:
+        retCheck = await checkTCP(port, mainConfig)
         break
-      }
-      case 'number': {
-        portNumber = Number(port)
-        break
-      }
-      default: {
-        core.setFailed(`Service: ${service.name} / Value: ${port} / Invalid port type: ${typeof port}`)
-        break
-      }
     }
-    core.info(`Checking port ${portNumber} for service ${service.name}...`)
 
-    const options = parseConfig(service)
-
-    if (await checkTCP(options)) {
-      core.info(`Service: ${service.name} / Port: ${portNumber} / Status: 🟢`)
+    if (retCheck) {
+      core.info(`Service: ${service.name} / Port: ${port} / Status: 🟢`)
     } else {
-      core.setFailed(`Service: ${service.name} / Port: ${portNumber} / Status: 🔴`)
+      core.setFailed(`Service: ${service.name} / Port: ${port} / Status: 🔴`)
     }
   }
 }
 
-function parseConfig(service: ServiceDef): CheckPortOptions {
-
-  var options: CheckPortOptions = {
-    port: 80,
-    protocol: 'tcp'
-  }
-
-  // loop through the labels, if they have the prefix to the port, read the configuration.
-
-  if (config.length === 0) {
-    return options
-  }
-
-  for (const value of Object.values(config)) {
-    console.log(value)
-  }
-
-
-
-  return options
+async function delay(ms: number) {
+  await new Promise(resolve => setTimeout(()=>resolve(true), ms)).then(()=>{});
 }
 
-async function checkTCP(options: CheckPortOptions): Promise<boolean> {
+async function checkTCP(port: string, options: Tree): Promise<boolean> {
   const host = '127.0.0.1'
+  const portNumber = Number(port)
+  const timeout = Number(options['timeout']) === NaN ? 1000: Number(options['timeout'])
+  const retries = Number(options['retries']) === NaN ? 5: Number(options['retries'])
+  const interval = Number(options['interval']) === NaN ? 1000: Number(options['interval'])
 
-
-
-
-  const promise = new Promise((resolve, reject) => {
-    const socket = new net.Socket()
-
-    const onError = () => {
-      socket.destroy()
-      reject()
-    }
-
-    socket.setTimeout(1000)
-    socket.once('error', onError)
-    socket.once('timeout', onError)
-
-    socket.connect(options.port, host, () => {
-      socket.end()
-      resolve(true)
+  for (let r = 0; r < retries; r++) {
+    const promise = new Promise((resolve, reject) => {
+      const socket = new net.Socket()
+  
+      const onError = () => {
+        socket.destroy()
+        reject()
+      }
+  
+      socket.setTimeout(timeout)
+      socket.once('error', onError)
+      socket.once('timeout', onError)
+  
+      socket.connect(portNumber, host, () => {
+        socket.end()
+        resolve(true)
+      })
     })
-  })
-
-  try {
-    await promise
-    return true
-  } catch {
-    return false
+  
+    try {
+      await promise
+      return true
+    } catch {
+      console.log("DELAY")
+      await delay(interval)
+    } 
   }
+  return false
 }

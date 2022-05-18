@@ -1,21 +1,33 @@
 import * as core from '@actions/core'
-
 import * as YAML from 'yamljs'
-
-import checkService, { ServiceDef } from './checks'
-
 import * as path from 'path'
+import type {ServiceDef, PortDef} from './checks'
+import {parse, parseLines, stringify} from 'dot-properties'
+import checkServices from './checks'
+
+interface YAMLSchema {
+  services: {
+    [key: string]: {
+      labels?: string[]
+      ports: (string | number)[]
+    }
+  }
+}
 
 async function run(): Promise<void> {
   try {
+    if (!process.env['CI']) {
+      require('source-map-support').install()
+    }
+
     core.info('Starting health check 🚀')
-    const wd: string = process.env[`GITHUB_WORKSPACE`] || ''
+    const wd: string = process.env['GITHUB_WORKSPACE'] || ''
     core.debug(`GITHUB_WORKSPACE: ${wd}`)
 
     const yamlFile = core.getInput('docker-compose-file') || path.join(wd, 'docker-compose.yml')
     core.debug(`Using docker-compose file: ${yamlFile}`)
 
-    const composeConfig = YAML.load(yamlFile)
+    const composeConfig = YAML.load(yamlFile) as YAMLSchema
     core.debug(`Loaded docker-compose file: ${JSON.stringify(composeConfig)}`)
 
     // grab the services from the compose file
@@ -28,22 +40,53 @@ async function run(): Promise<void> {
 
       // get the service definition
       const service = services[serviceName]
-      core.debug(`Found service: ${JSON.stringify(service)}`)
-      core.debug(`Found ${Object.keys(service.ports).length} ports`)
+      core.debug(`Found service: ${JSON.stringify(service)} with ${Object.keys(service.ports).length} ports`)
 
-      const serviceDef: ServiceDef = {
-        name: serviceName,
-        labels: service.labels,
-        ports: service.ports
+      if (service.ports === undefined) {
+        core.setFailed(`Service ${serviceName} has no ports defined`)
       }
 
-      console.log(serviceDef)
+      if (service.labels === undefined) {
+        core.info(`Service ${serviceName} has no labels defined, consider setting appropriate labels. Using defaults.`)
+        service.labels = []
+      }
 
-      checkService(serviceDef)
+      const config: ServiceDef = {
+        name: serviceName,
+        ports: []
+      }
+
+      for (const port of service.ports) {
+        let portNumber = 0
+
+        if (typeof port === 'string') {
+          if (port.endsWith('/udp')) {
+            core.info(`Service ${serviceName} has a UDP port: ${port}, not supported. TCP will be used instead.`)
+          }
+          portNumber = Number(port.split(':')[0])
+        } else {
+          portNumber = Number(port)
+        }
+
+        const filteredLabels = service.labels
+          .filter(label => {
+            return label.includes(`.${portNumber}.`)
+          })
+          .join('\n')
+
+        let configPort: PortDef = {
+          port: portNumber,
+          config: parse(filteredLabels, true)
+        }
+
+        config.ports.push(configPort)
+      }
+      checkServices(config)
     }
   } catch (error) {
     if (error instanceof Error) {
       core.setFailed(error.message)
+      console.log(error.stack?.split('\n'))
     }
   } finally {
     core.info('Finished health check...')
