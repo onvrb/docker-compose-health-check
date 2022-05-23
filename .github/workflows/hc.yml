@@ -11,7 +11,6 @@ jobs:
       - name: Run docker compose up
         run: |
           docker-compose -f tests/ssh_http_mongodb_mariadb.yml up -d
-          docker-compose ps
 
       - uses: onvrb/docker-compose-health-check@main
         with:
