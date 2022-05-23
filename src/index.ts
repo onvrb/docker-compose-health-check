@@ -2,7 +2,7 @@ import * as core from '@actions/core'
 import * as YAML from 'yamljs'
 import * as path from 'path'
 import type {ServiceDef, PortDef} from './checks'
-import { parse } from 'dot-properties'
+import {parse} from 'dot-properties'
 import checkServices from './checks'
 
 interface YAMLSchema {

@@ -1,5 +1,5 @@
 import * as core from '@actions/core'
-import { Tree } from 'dot-properties'
+import {Tree} from 'dot-properties'
 import net from 'node:net'
 
 export interface ServiceDef {
@@ -20,6 +20,13 @@ export default async function checkServices(service: ServiceDef) {
     const dchcPort = typeof dchc['port'] === 'object' ? (dchc['port'] as Tree) : ({} as Tree)
     const mainConfig = typeof dchcPort[port] === 'object' ? (dchcPort[port] as Tree) : ({} as Tree)
     const protocol = typeof mainConfig['protocol'] === 'string' ? mainConfig['protocol'] : 'tcp'
+
+    const enabled = mainConfig['enabled'] !== 'false'
+
+    if (!enabled) {
+      core.info(`Service ${service.name} on port ${port} is disabled, skipping port...`)
+      continue
+    }
 
     let retCheck = false
     switch (protocol) {
