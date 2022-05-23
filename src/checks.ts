@@ -1,5 +1,5 @@
 import * as core from '@actions/core'
-import {stringify, Tree} from 'dot-properties'
+import { Tree } from 'dot-properties'
 import net from 'node:net'
 
 export interface ServiceDef {
@@ -11,8 +11,6 @@ export interface PortDef {
   config: Tree
 }
 
-type ConfigNode = Tree | string
-
 export default async function checkServices(service: ServiceDef) {
   for (const portConfig of service.ports) {
     const port = String(portConfig.port)
@@ -22,7 +20,6 @@ export default async function checkServices(service: ServiceDef) {
     const dchcPort = typeof dchc['port'] === 'object' ? (dchc['port'] as Tree) : ({} as Tree)
     const mainConfig = typeof dchcPort[port] === 'object' ? (dchcPort[port] as Tree) : ({} as Tree)
     const protocol = typeof mainConfig['protocol'] === 'string' ? mainConfig['protocol'] : 'tcp'
-    const protocolConfig = (mainConfig[protocol] ?? {}) as Tree
 
     let retCheck = false
     switch (protocol) {
