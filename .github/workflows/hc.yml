@@ -10,7 +10,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Run docker compose up
         run: |
-          docker-compose up -d
+          docker-compose up -d -f tests/ssh_http_mongodb_mariadb.yml
           docker-compose ps
 
       - uses: onvrb/docker-compose-health-check@main
