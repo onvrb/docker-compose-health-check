@@ -27,6 +27,7 @@ async function run(): Promise<void> {
     const yamlFile = core.getInput('docker-compose-file') || path.join(wd, 'docker-compose.yml')
     core.debug(`Using docker-compose file: ${yamlFile}`)
 
+    // get and parse yaml file
     const composeConfig = YAML.load(yamlFile) as YAMLSchema
     core.debug(`Loaded docker-compose file: ${JSON.stringify(composeConfig)}`)
 
@@ -37,17 +38,19 @@ async function run(): Promise<void> {
     // loop through the services
     for (const serviceName in services) {
       core.debug(`Checking service: ${serviceName}`)
-
+  
       // get the service definition
       const service = services[serviceName]
-      core.debug(`Found service: ${JSON.stringify(service)} with ${Object.keys(service.ports).length} ports`)
 
       if (service.ports === undefined) {
-        core.setFailed(`Service ${serviceName} has no ports defined`)
+        core.info(`Service ${serviceName} has no ports exposed!⚠️  Skipping service... ⚠️ `)
+        continue
       }
 
+      core.debug(`Service ${serviceName} has ${Object.keys(service.ports).length} ports`)
+
       if (service.labels === undefined) {
-        core.info(`Service ${serviceName} has no labels defined, consider setting appropriate labels. Using defaults.`)
+        core.info(`Service ${serviceName} has no labels defined, consider setting appropriate labels. Using defaults...`)
         service.labels = []
       }
 
