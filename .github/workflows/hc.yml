@@ -4,11 +4,15 @@ on:
 
 jobs:
   hc:
-   
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v2
+      - name: Run docker compose up
+        run: |
+          docker-compose up -d
+          docker-compose ps
+
       - uses: onvrb/docker-compose-health-check@main
         with:
-          docker-compose-file: docker-compose.yml
-       
+          docker-compose-file: tests/ssh_http_mongodb_mariadb.yml

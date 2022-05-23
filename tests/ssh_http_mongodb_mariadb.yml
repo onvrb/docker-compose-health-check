@@ -1,0 +1,22 @@
+---
+version: "3"
+services:
+  ssh:
+    image: lscr.io/linuxserver/openssh-server
+    ports:
+      - 22:2222
+
+  nginx:
+    image: lscr.io/linuxserver/nginx
+    ports:
+      - 80:80
+
+  mongodb:
+    image: mongo
+    ports:
+      - 27017:27017
+
+  mariadb:
+    image: mariadb:10
+    ports:
+      - 3306:3306
