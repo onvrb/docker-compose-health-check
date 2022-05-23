@@ -38,7 +38,7 @@ async function run(): Promise<void> {
     // loop through the services
     for (const serviceName in services) {
       core.debug(`Checking service: ${serviceName}`)
-  
+
       // get the service definition
       const service = services[serviceName]
 
@@ -50,7 +50,9 @@ async function run(): Promise<void> {
       core.debug(`Service ${serviceName} has ${Object.keys(service.ports).length} ports`)
 
       if (service.labels === undefined) {
-        core.info(`Service ${serviceName} has no labels defined, consider setting appropriate labels. Using defaults...`)
+        core.info(
+          `Service ${serviceName} has no labels defined, consider setting appropriate labels. Using defaults...`
+        )
         service.labels = []
       }
 
