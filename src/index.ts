@@ -81,7 +81,7 @@ async function run(): Promise<void> {
 
         config.ports.push(configPort)
       }
-      checkServices(config)
+      await checkServices(config)
     }
   } catch (error) {
     if (error instanceof Error) {

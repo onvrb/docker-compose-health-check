@@ -92,7 +92,7 @@ function run() {
                     };
                     config.ports.push(configPort);
                 }
-                checks_1.default(config);
+                yield checks_1.default(config);
             }
         }
         catch (error) {

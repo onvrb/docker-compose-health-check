@@ -42,7 +42,7 @@ function checkServices(service) {
             const dchc = typeof config['dchc'] === 'object' ? config['dchc'] : {};
             const dchcPort = typeof dchc['port'] === 'object' ? dchc['port'] : {};
             const mainConfig = typeof dchcPort[port] === 'object' ? dchcPort[port] : {};
-            const protocol = typeof mainConfig['protocol'] === 'string' ? mainConfig['protocol'] : "tcp";
+            const protocol = typeof mainConfig['protocol'] === 'string' ? mainConfig['protocol'] : 'tcp';
             const protocolConfig = ((_a = mainConfig[protocol]) !== null && _a !== void 0 ? _a : {});
             let retCheck = false;
             switch (protocol) {
@@ -69,9 +69,9 @@ function checkTCP(port, options) {
     return __awaiter(this, void 0, void 0, function* () {
         const host = '127.0.0.1';
         const portNumber = Number(port);
-        const timeout = Number(options['timeout']) === NaN ? 1000 : Number(options['timeout']);
-        const retries = Number(options['retries']) === NaN ? 5 : Number(options['retries']);
-        const interval = Number(options['interval']) === NaN ? 1000 : Number(options['interval']);
+        const timeout = isNaN(Number(options['timeout'])) ? 1000 : Number(options['timeout']);
+        const retries = isNaN(Number(options['retries'])) ? 5 : Number(options['retries']);
+        const interval = isNaN(Number(options['interval'])) ? 1000 : Number(options['interval']);
         for (let r = 0; r < retries; r++) {
             const promise = new Promise((resolve, reject) => {
                 const socket = new node_net_1.default.Socket();
@@ -82,17 +82,17 @@ function checkTCP(port, options) {
                 socket.setTimeout(timeout);
                 socket.once('error', onError);
                 socket.once('timeout', onError);
-                socket.connect(portNumber, host, () => {
-                    socket.end();
+                socket.once('connect', () => {
+                    socket.destroy();
                     resolve(true);
                 });
+                socket.connect(portNumber, host);
             });
             try {
                 yield promise;
                 return true;
             }
             catch (_a) {
-                console.log("DELAY");
                 yield delay(interval);
             }
         }
