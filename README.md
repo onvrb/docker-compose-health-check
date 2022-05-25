@@ -50,12 +50,20 @@ jobs:
 ```yaml
 version: "3.9"
 services:
-  db:
+  mariadb:
+    image: mariadb
+    volumes:
+      - ./mariadb:/var/lib/mysql
+    # ports:                             # purposely commented
+    #   - "3306:3306"                    # service check will be skipped because has no exposed ports
+    labels:                              # even if you specify a label,
+      - "dchc.port.3306.enabled=true"    # it will be ignored
+  mongodb:
     image: mongo
+    volumes:
+      - ./mongodb:/data/db
     ports:
       - "27017:27017"
-    volumes:
-      - ./db:/data/db
     labels:
       - "dchc.port.27017.enabled=true"   # optional
       - "dchc.port.27017.timeout=1"      # optional
@@ -76,7 +84,8 @@ services:
       - "dchc.port.9090.enabled=false"   # disables check for port 9090
       - "dchc.port.9000.enabled=true"    # does nothing because 9000 is not an exposed port
     depends_on:
-      - db
+      - mariadb
+      - mongodb
 ```
 
 # Contributing
