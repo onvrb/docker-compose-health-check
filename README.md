@@ -5,7 +5,6 @@ This action checks if the docker compose services are running. As of the latest 
 # Usage
 
 To add this action to a workflow:
-
 ```yaml
       - uses: onvrb/docker-compose-health-check@main
         with:
@@ -22,16 +21,32 @@ Accepts the exposed ports as docker compose accepts them:
 ```
 
 It will perform the TCP check for all ports and services assuming these default labels for each exposed port (if not specified):
-  ```yaml
-    labels:
-      - "dchc.port.80.enabled=true"  # enables check for port 80
-      - "dchc.port.80.timeout=1"     # TCP connection timeout in seconds for port 80
-      - "dchc.port.80.retries=5"     # how many retries for port 80
-      - "dchc.port.80.interval=1"    # interval in seconds between retries for port 80
-  ```
+```yaml
+  labels:
+    - "dchc.port.80.enabled=true"  # enables check for port 80
+    - "dchc.port.80.timeout=1"     # TCP connection timeout in seconds for port 80
+    - "dchc.port.80.retries=5"     # how many retries for port 80
+    - "dchc.port.80.interval=1"    # interval in seconds between retries for port 80
+```
 
-# Examples
-  
+# Action example
+```yaml
+name: docker compose health check
+on:
+  push:
+
+jobs:
+  hc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run docker compose up
+        run: |
+          docker-compose up -d
+      - uses: onvrb/docker-compose-health-check@main
+```
+
+# Labeling docker compose examples
 ```yaml
 version: "3.9"
 services:
