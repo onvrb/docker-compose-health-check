@@ -19,15 +19,16 @@ Accepts the exposed ports as docker compose accepts them:
       - 82:83
       - "84:85"
 ```
+# Labels
 
-It will perform the TCP check for all ports and services assuming these default labels for each exposed port (if not specified):
-```yaml
-  labels:
-    - "dchc.port.80.enabled=true"  # enables check for port 80
-    - "dchc.port.80.timeout=1"     # TCP connection timeout in seconds for port 80
-    - "dchc.port.80.retries=5"     # how many retries for port 80
-    - "dchc.port.80.interval=1"    # interval in seconds between retries for port 80
-```
+All labels must have the prefix `dchc.port.X` where `X` is the port number. See the [example below](#labeling-docker-compose-examples).
+
+| Label      | Default  | Description |
+| :--------: | :------: | ----------- |
+| `enabled`  | `true`   | Enables or disables check for that port. |
+| `timeout`  | `1`      | The timeout for the TCP connection in seconds. |
+| `retries`  | `5`      | The number of retries. |
+| `interval` | `1`      | Interval between retries in seconds. |
 
 # Action example
 ```yaml
@@ -46,7 +47,7 @@ jobs:
       - uses: onvrb/docker-compose-health-check@main
 ```
 
-# Labeling docker compose examples
+# Labeling docker compose example
 ```yaml
 version: "3.9"
 services:
