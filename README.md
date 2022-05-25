@@ -6,6 +6,7 @@ This action checks if the docker compose services are running. As of the latest 
 
 To add this action to a workflow:
 ```yaml
+      - name: docker compose health check
       - uses: onvrb/docker-compose-health-check@main
         with:
           docker-compose-file: docker-compose.yml     # optional, assumes docker-compose.yml
@@ -44,6 +45,7 @@ jobs:
       - name: Run docker compose up
         run: |
           docker-compose up -d
+      - name: docker compose health check
       - uses: onvrb/docker-compose-health-check@main
 ```
 
