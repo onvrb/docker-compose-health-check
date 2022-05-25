@@ -69,12 +69,12 @@ services:
       - "8080:80"
       - "9090:9000"
     labels:
-      - "dchc.port.8080.enabled=true"   # optional
-      - "dchc.port.8080.timeout=1"      # optional
-      - "dchc.port.8080.retries=10"     # overrides default retries to 10
-      - "dchc.port.8080.interval=3"     # overrides default interval to 3s
-      - "dchc.port.9090.enabled=false"  # disables check for port 9000
-      - "dchc.port.9000.enabled=true"   # does nothing because 9000 is not an exposed port
+      - "dchc.port.8080.enabled=true"    # optional
+      - "dchc.port.8080.timeout=1"       # optional
+      - "dchc.port.8080.retries=10"      # overrides default retries to 10
+      - "dchc.port.8080.interval=3"      # overrides default interval to 3s
+      - "dchc.port.9090.enabled=false"   # disables check for port 9000
+      - "dchc.port.9000.enabled=true"    # does nothing because 9000 is not an exposed port
     depends_on:
       - db
 ```
