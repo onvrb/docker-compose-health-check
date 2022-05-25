@@ -50,9 +50,9 @@ async function delay(ms: number) {
 async function checkTCP(port: string, options: Tree) {
   const host = '127.0.0.1'
   const portNumber = Number(port)
-  const timeout = isNaN(Number(options['timeout'])) ? 1000 : Number(options['timeout'])
+  const timeout = isNaN(Number(options['timeout'])) ? 1000 : Number(options['timeout']) * 1000
   const retries = isNaN(Number(options['retries'])) ? 5 : Number(options['retries'])
-  const interval = isNaN(Number(options['interval'])) ? 1000 : Number(options['interval'])
+  const interval = isNaN(Number(options['interval'])) ? 1000 : Number(options['interval']) * 1000
 
   for (let r = 0; r < retries; r++) {
     const promise = new Promise((resolve, reject) => {
