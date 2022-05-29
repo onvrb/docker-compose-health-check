@@ -22,7 +22,7 @@ Accepts the exposed ports as docker compose accepts them:
 ```
 # Labels
 
-All labels must have the prefix `dchc.port.X` where `X` is the port number. See the [example below](#labeling-docker-compose-examples).
+All labels must have the prefix `dchc.port.X` where `X` is the port number. See the [example below](#labeling-docker-compose-example).
 
 | Label      | Default  | Description |
 | :--------: | :------: | ----------- |
