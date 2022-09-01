@@ -1,0 +1,19 @@
+name: test my own action
+
+on: 
+  workflow_dispatch: # only triggered manually
+
+jobs:
+  test:
+  runs-on: ubuntu-latest
+  steps:
+    - name: checkout repository
+      uses: actions/checkout@v3
+
+    - name: start containers
+      run: cd tests && docker-compose up -d -f ssh_http_mongodb_mariadb.yml
+
+    - name: docker compose health check
+    - uses: onvrb/docker-compose-health-check@main
+      with:
+        docker-compose-file: ssh_http_mongodb_mariadb.yml
