@@ -16,4 +16,4 @@ jobs:
       - name: docker compose health check
         uses: onvrb/docker-compose-health-check@main
         with:
-          docker-compose-file: ssh_http_mongodb_mariadb.yml
+          docker-compose-file: tests/ssh_http_mongodb_mariadb.yml
